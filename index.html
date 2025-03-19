@@ -1,317 +1,507 @@
 <!DOCTYPE html>
 <html lang="pt">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Treino e Agenda</title>
     <style>
-        body { font-family: Arial, sans-serif; }
-        .container { max-width: 800px; margin: auto; padding: 20px; }
-        input, select, button { display: block; margin: 10px 0; padding: 8px; }
-        table { width: 100%; border-collapse: collapse; }
-        th, td { border: 1px solid black; padding: 8px; text-align: center; }
-        .hidden { display: none; }
-    </style>
-</head>
-<body>
+      body {
+          font-family: Arial, sans-serif;
+          background-color: #121212;
+          color: white;
+          text-align: center;
+          margin: 0;
+          padding: 0;
+      }
+      .container {
+          max-width: 90%;
+          margin: 20px auto;
+          padding: 20px;
+          background: #1e1e1e;
+          border-radius: 10px;
+          box-shadow: 0px 0px 10px rgba(255, 255, 255, 0.1);
+      }
+      select, input, button, textarea {
+          width: 100%;
+          padding: 10px;
+          margin: 10px 0;
+          border: none;
+          border-radius: 5px;
+      }
+      select, input, textarea {
+          background-color: #2a2a2a;
+          color: white;
+      }
+      button {
+          background-color: #6200ea;
+          color: white;
+          font-weight: bold;
+          cursor: pointer;
+      }
+      button:hover {
+          background-color: #3700b3;
+      }
+      .hidden {
+          display: none;
+      }
+      table {
+          width: 100%;
+          border-collapse: collapse;
+          margin-top: 20px;
+          background: #2a2a2a;
+          border-radius: 8px;
+          overflow: hidden;
+      }
+      th, td {
+          padding: 10px;
+          border: 1px solid #444;
+      }
+      th {
+          background-color: #6200ea;
+          color: white;
+      }
+      td {
+          color: white;
+      }
+      @media (max-width: 600px) {
+          table, thead, tbody, th, td, tr {
+              display: block;
+          }
+          tr {
+              margin-bottom: 10px;
+          }
+          th {
+              display: none;
+          }
+          td {
+              position: relative;
+              padding-left: 50%;
+              text-align: right;
+          }
+          td:before {
+              content: attr(data-label);
+              position: absolute;
+              left: 10px;
+              width: 45%;
+              padding-right: 10px;
+              text-align: left;
+              font-weight: bold;
+          }
+      }
+      .loading-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.7);
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+        .loading-spinner {
+            width: 50px;
+            height: 50px;
+            border: 5px solid white;
+            border-top: 5px solid purple;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+  </style>
+  </head>
+  <body>
     <div class="container">
-        <h2>Escolha uma opção</h2>
-        <select id="modo" onchange="alternarModo()">
-            <option value="">Selecione</option>
-            <option value="cadastroJson">Cadastrar Ficha de Treino com json</option>
-            <option value="cadastro">Cadastrar Ficha de Treino</option>
-            <option value="agenda">Usar Agenda de Treino</option>
-            <option value="visualizar">Visualizar Treino</option>
+      <h2>Escolha uma opção</h2>
+      <select id="modo" onchange="alternarModo()">
+        <option value="">Selecione</option>
+        <option value="cadastroJson">Cadastrar Ficha de Treino com json</option>
+        <option value="cadastro">Cadastrar Ficha de Treino</option>
+        <option value="agenda">Usar Agenda de Treino</option>
+        <option value="visualizar">Visualizar Treino</option>
+        <option value="holt">Diagrama de Holten </option>
+      </select>
+
+      <div id="formCadastro" class="hidden">
+        <textarea
+          id="jsonFicha"
+          rows="10"
+          cols="50"
+          placeholder="Cole o JSON da ficha de treino aqui"
+        ></textarea
+        ><br /><br />
+        <button onclick="cadastrarFichaComJson()">
+          Cadastrar Ficha de Treino
+        </button>
+      </div>
+
+      <div id="cadastroTreino" class="hidden">
+        <h2>Cadastro de Ficha de Treino</h2>
+        <label for="dia">Dia da Semana:</label>
+        <select id="dia">
+          <option value="">Selecione um dia</option>
+          <option value="Segunda-feira">Segunda-feira</option>
+          <option value="Terça-feira">Terça-feira</option>
+          <option value="Quarta-feira">Quarta-feira</option>
+          <option value="Quinta-feira">Quinta-feira</option>
+          <option value="Sexta-feira">Sexta-feira</option>
+          <option value="Sábado">Sábado</option>
+          <option value="Domingo">Domingo</option>
         </select>
 
-        <div id="formCadastro" class="hidden">
-            <textarea id="jsonFicha" rows="10" cols="50" placeholder="Cole o JSON da ficha de treino aqui"></textarea><br><br>
-            <button onclick="cadastrarFichaComJson()">Cadastrar Ficha de Treino</button>
-        </div>
+        <label for="exercicio">Exercício:</label>
+        <input type="text" id="exercicio" placeholder="Digite o exercício" />
 
-        <div id="cadastroTreino" class="hidden">
-            <h2>Cadastro de Ficha de Treino</h2>
-            <label for="dia">Dia da Semana:</label>
-            <select id="dia">
-                <option value="">Selecione um dia</option>
-                <option value="Segunda-feira">Segunda-feira</option>
-                <option value="Terça-feira">Terça-feira</option>
-                <option value="Quarta-feira">Quarta-feira</option>
-                <option value="Quinta-feira">Quinta-feira</option>
-                <option value="Sexta-feira">Sexta-feira</option>
-                <option value="Sábado">Sábado</option>
-                <option value="Domingo">Domingo</option>
-            </select>
+        <input type="number" id="series" placeholder="Séries" />
+        <input type="number" id="repeticoes" placeholder="Repetições" />
+        <input type="text" id="descanso" placeholder="Descanso" />
+        <button onclick="cadastrarTreino()">Cadastrar Treino</button>
+      </div>
 
-            <label for="exercicio">Exercício:</label>
-            <input type="text" id="exercicio" placeholder="Digite o exercício">
+      <div id="agendaTreino" class="hidden">
+        <h2>Agenda de Treino</h2>
+        <label for="diaTreino">Dia da Semana:</label>
+        <select id="diaTreino" onchange="carregarExerciciosAgenda()">
+          <option value="">Selecione um dia</option>
+          <option value="Segunda-feira">Segunda-feira</option>
+          <option value="Terça-feira">Terça-feira</option>
+          <option value="Quarta-feira">Quarta-feira</option>
+          <option value="Quinta-feira">Quinta-feira</option>
+          <option value="Sexta-feira">Sexta-feira</option>
+          <option value="Sábado">Sábado</option>
+          <option value="Domingo">Domingo</option>
+        </select>
+        <select id="exercicioTreino">
+          <option value="">Selecione um dia primeiro</option>
+        </select>
+        <input type="number" id="seriesFeitas" placeholder="Séries Feitas" />
+        <input type="number" id="carga" placeholder="Carga (kg)" />
+        <input type="number" id="repsFeitas" placeholder="Repetições" />
+        <input type="text" id="descansoFeito" placeholder="Descanso" />
+        <input type="text" id="equipamentos" placeholder="Equipamentos" />
+        <button onclick="registrarTreino()">Registrar Treino</button>
+      </div>
 
-            <input type="number" id="series" placeholder="Séries">
-            <input type="number" id="repeticoes" placeholder="Repetições">
-            <input type="text" id="descanso" placeholder="Descanso">
-            <button onclick="cadastrarTreino()">Cadastrar Treino</button>
-        </div>
-
-        <div id="agendaTreino" class="hidden">
-            <h2>Agenda de Treino</h2>
-            <label for="diaTreino">Dia da Semana:</label>
-            <select id="diaTreino" onchange="carregarExerciciosAgenda()">
-                <option value="">Selecione um dia</option>
-                <option value="Segunda-feira">Segunda-feira</option>
-                <option value="Terça-feira">Terça-feira</option>
-                <option value="Quarta-feira">Quarta-feira</option>
-                <option value="Quinta-feira">Quinta-feira</option>
-                <option value="Sexta-feira">Sexta-feira</option>
-                <option value="Sábado">Sábado</option>
-                <option value="Domingo">Domingo</option>
-            </select>
-            <select id="exercicioTreino">
-                <option value="">Selecione um dia primeiro</option>
-            </select>
-            <input type="number" id="seriesFeitas" placeholder="Séries Feitas">
-            <input type="number" id="carga" placeholder="Carga (kg)">
-            <input type="number" id="repsFeitas" placeholder="Repetições">
-            <input type="text" id="descansoFeito" placeholder="Descanso">
-            <input type="text" id="equipamentos" placeholder="Equipamentos">
-            <button onclick="registrarTreino()">Registrar Treino</button>
-        </div>
-
-        <div id="visualizarTreino" class="hidden">
-            <h2>Visualizar Treino</h2>
-            <label for="diaVisualizar">Dia da Semana:</label>
-            <select id="diaVisualizar" onchange="carregarTreinoDoDiaUltimaCarga()">
-                <option value="">Selecione um dia</option>
-                <option value="Segunda-feira">Segunda-feira</option>
-                <option value="Terça-feira">Terça-feira</option>
-                <option value="Quarta-feira">Quarta-feira</option>
-                <option value="Quinta-feira">Quinta-feira</option>
-                <option value="Sexta-feira">Sexta-feira</option>
-                <option value="Sábado">Sábado</option>
-                <option value="Domingo">Domingo</option>
-            </select>
-            <table>
-                <thead>
-                    <tr>
-                        <th>Exercício</th>
-                        <th>Séries</th>
-                        <th>Repetições</th>
-                        <th>Descanso</th>
-                        <th>Última Carga (kg)</th>
-                    </tr>
-                </thead>
-                <tbody id="tabelaTreino"></tbody>
-            </table>
-        </div>
+      <div id="visualizarTreino" class="hidden">
+        <h2>Visualizar Treino</h2>
+        <label for="diaVisualizar">Dia da Semana:</label>
+        <select id="diaVisualizar" onchange="carregarTreinoDoDiaUltimaCarga()">
+          <option value="">Selecione um dia</option>
+          <option value="Segunda-feira">Segunda-feira</option>
+          <option value="Terça-feira">Terça-feira</option>
+          <option value="Quarta-feira">Quarta-feira</option>
+          <option value="Quinta-feira">Quinta-feira</option>
+          <option value="Sexta-feira">Sexta-feira</option>
+          <option value="Sábado">Sábado</option>
+          <option value="Domingo">Domingo</option>
+        </select>
+        <table>
+          <thead>
+            <tr>
+              <th>Exercício</th>
+              <th>Séries</th>
+              <th>Repetições</th>
+              <th>Descanso</th>
+              <th>Última Carga (kg)</th>
+            </tr>
+          </thead>
+          <tbody id="tabelaTreino"></tbody>
+        </table>
+      </div>
     </div>
+    <div class="loading-overlay" id="loadingOverlay">
+      <div class="loading-spinner"></div>
+  </div>
 
     <script>
-        urlBase = "https://script.google.com/macros/s/AKfycbyviFs9MB13IPH56GqNAppLv6b_w1dm9qjR0o-7DV5OscaVZDsM6n3iqzGyZZa2mlaY/exec"
-        function registrarTreino() {
-    const url = urlBase; // Substitua pela URL do Apps Script
-    const dia = document.getElementById("diaTreino").value;
-    const exercicio = document.getElementById("exercicioTreino").value;
-    const seriesFeitas = document.getElementById("seriesFeitas").value;
-    const carga = document.getElementById("carga").value;
-    const repsFeitas = document.getElementById("repsFeitas").value;
-    const descansoFeito = document.getElementById("descansoFeito").value;
-    const equipamentos = document.getElementById("equipamentos").value;
-
-    if (!dia || !exercicio || !seriesFeitas || !carga || !repsFeitas || !descansoFeito || !equipamentos) {
-        alert("Preencha todos os campos!");
-        return;
-    }
-
-    const dados = {
-        tipo: "registro", // Especificando que é um registro de treino
-        dia: dia,
-        exercicio: exercicio,
-        seriesFeitas: seriesFeitas,
-        carga: carga,
-        repsFeitas: repsFeitas,
-        descansoFeito: descansoFeito,
-        equipamentos: equipamentos
-    };
-
-    fetch(url, {
-        method: "POST",
-        mode: "no-cors",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(dados)
-    }).then(() => {
-        alert("Treino registrado com sucesso!");
-        document.getElementById("seriesFeitas").value = "";
-        document.getElementById("carga").value = "";
-        document.getElementById("repsFeitas").value = "";
-        document.getElementById("descansoFeito").value = "";
-        document.getElementById("equipamentos").value = "";
-    }).catch(error => console.error("Erro ao registrar treino:", error));
-}
-
-        function cadastrarTreino(dadosTreino = null) {
-    const url = urlBase; // Substitua pela URL do Apps Script
-    let dia, exercicio, series, repeticoes, descanso;
-
-    // Verificar se dadosTreino foi passado como parâmetro
-    if (dadosTreino != null) {
-        // Se sim, usa os valores de dadosTreino
-        dia = dadosTreino.dia;
-        exercicio = dadosTreino.exercicio;
-        series = dadosTreino.series;
-        repeticoes = dadosTreino.repeticoes;
-        descanso = dadosTreino.descanso;
-    } else {
-    dia = document.getElementById("dia").value;
-    exercicio = document.getElementById("exercicio").value;
-    series = document.getElementById("series").value;
-    repeticoes = document.getElementById("repeticoes").value;
-    descanso = document.getElementById("descanso").value;
-    }
-    if (!dia || !exercicio || !series || !repeticoes || !descanso) {
-        console.log("1. Preencha todos os campos! " + dia + " " + exercicio + " " + series + " " + repeticoes + " " + descanso);
-        return;
-    }
-
-    const dados = {
-        tipo: "ficha", // Especificando que é uma ficha de treino
-        dia: dia,
-        exercicio: exercicio,
-        series: series,
-        repeticoes: repeticoes,
-        descanso: descanso
-    };
-
-    fetch(url, {
-        method: "POST",
-        mode: "no-cors",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(dados)
-    }).then(() => {
-        alert("Ficha cadastrada com sucesso!");
-        document.getElementById("dia").value = "";
-        document.getElementById("exercicio").value = "";
-        document.getElementById("series").value = "";
-        document.getElementById("repeticoes").value = "";
-        document.getElementById("descanso").value = "";
-    }).catch(error => console.error("Erro ao cadastrar ficha:", error));
-}
-        function alternarModo() {
-            const modo = document.getElementById("modo").value;
-            document.getElementById("formCadastro").classList.toggle("hidden", modo !== "cadastroJson");
-            document.getElementById("cadastroTreino").classList.toggle("hidden", modo !== "cadastro");
-            document.getElementById("agendaTreino").classList.toggle("hidden", modo !== "agenda");
-            document.getElementById("visualizarTreino").classList.toggle("hidden", modo !== "visualizar");
+      function carregandoOn() {
+            document.getElementById("loadingOverlay").style.display = "flex";
         }
-        function carregarExerciciosAgenda() {
-    const dia = document.getElementById("diaTreino").value;
-    if (!dia) return;
+        function carregandoOff() {
+            document.getElementById("loadingOverlay").style.display = "none";
+        }
+      urlBase =
+        "https://script.google.com/macros/s/AKfycbyviFs9MB13IPH56GqNAppLv6b_w1dm9qjR0o-7DV5OscaVZDsM6n3iqzGyZZa2mlaY/exec";
+      function registrarTreino() {
+        const url = urlBase; // Substitua pela URL do Apps Script
+        const dia = document.getElementById("diaTreino").value;
+        const exercicio = document.getElementById("exercicioTreino").value;
+        const seriesFeitas = document.getElementById("seriesFeitas").value;
+        const carga = document.getElementById("carga").value;
+        const repsFeitas = document.getElementById("repsFeitas").value;
+        const descansoFeito = document.getElementById("descansoFeito").value;
+        const equipamentos = document.getElementById("equipamentos").value;
 
-    const url = `${urlBase}?sheet=FichasTreino&dia=${encodeURIComponent(dia)}`;
+        if (
+          !dia ||
+          !exercicio ||
+          !seriesFeitas ||
+          !carga ||
+          !repsFeitas ||
+          !descansoFeito ||
+          !equipamentos
+        ) {
+          alert("Preencha todos os campos!");
+          return;
+        }
 
-    fetch(url)
-        .then(response => response.json())
-        .then(exercicios => {
+        const dados = {
+          tipo: "registro", // Especificando que é um registro de treino
+          dia: dia,
+          exercicio: exercicio,
+          seriesFeitas: seriesFeitas,
+          carga: carga,
+          repsFeitas: repsFeitas,
+          descansoFeito: descansoFeito,
+          equipamentos: equipamentos,
+        };
+
+        fetch(url, {
+          method: "POST",
+          mode: "no-cors",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(dados),
+        })
+          .then(() => {
+            alert("Treino registrado com sucesso!");
+            document.getElementById("seriesFeitas").value = "";
+            document.getElementById("carga").value = "";
+            document.getElementById("repsFeitas").value = "";
+            document.getElementById("descansoFeito").value = "";
+            document.getElementById("equipamentos").value = "";
+          })
+          .catch((error) => console.error("Erro ao registrar treino:", error));
+      }
+
+      function cadastrarTreino(dadosTreino = null) {
+        const url = urlBase; // Substitua pela URL do Apps Script
+        let dia, exercicio, series, repeticoes, descanso;
+
+        // Verificar se dadosTreino foi passado como parâmetro
+        if (dadosTreino != null) {
+          // Se sim, usa os valores de dadosTreino
+          dia = dadosTreino.dia;
+          exercicio = dadosTreino.exercicio;
+          series = dadosTreino.series;
+          repeticoes = dadosTreino.repeticoes;
+          descanso = dadosTreino.descanso;
+        } else {
+          dia = document.getElementById("dia").value;
+          exercicio = document.getElementById("exercicio").value;
+          series = document.getElementById("series").value;
+          repeticoes = document.getElementById("repeticoes").value;
+          descanso = document.getElementById("descanso").value;
+        }
+        if (!dia || !exercicio || !series || !repeticoes || !descanso) {
+          console.log(
+            "1. Preencha todos os campos! " +
+              dia +
+              " " +
+              exercicio +
+              " " +
+              series +
+              " " +
+              repeticoes +
+              " " +
+              descanso
+          );
+          return;
+        }
+
+        const dados = {
+          tipo: "ficha", // Especificando que é uma ficha de treino
+          dia: dia,
+          exercicio: exercicio,
+          series: series,
+          repeticoes: repeticoes,
+          descanso: descanso,
+        };
+
+        fetch(url, {
+          method: "POST",
+          mode: "no-cors",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(dados),
+        })
+          .then(() => {
+            alert("Ficha cadastrada com sucesso!");
+            document.getElementById("dia").value = "";
+            document.getElementById("exercicio").value = "";
+            document.getElementById("series").value = "";
+            document.getElementById("repeticoes").value = "";
+            document.getElementById("descanso").value = "";
+          })
+          .catch((error) => console.error("Erro ao cadastrar ficha:", error));
+      }
+
+      function alternarModo() {
+            const modo = document.getElementById("modo").value;
+            document.getElementById("formCadastro").classList.add("hidden");
+            document.getElementById("cadastroTreino").classList.add("hidden");
+            document.getElementById("visualizarTreino").classList.add("hidden");
+            document.getElementById("agendaTreino").classList.add("hidden");
+
+            if (modo === "cadastroJson") {
+                document.getElementById("formCadastro").classList.remove("hidden");
+            } else if (modo === "cadastro") {
+                document.getElementById("cadastroTreino").classList.remove("hidden");
+            } else if (modo === "visualizar") {
+                document.getElementById("visualizarTreino").classList.remove("hidden");
+            }else if(modo === "agenda"){
+                document.getElementById("agendaTreino").classList.remove("hidden");
+            } else if (modo === "holt"){
+              window.location.href = "holt.html";
+            }
+        }
+
+      function carregarExerciciosAgenda() {
+        const dia = document.getElementById("diaTreino").value;
+        if (!dia) return;
+        carregandoOn();
+        const url = `${urlBase}?sheet=FichasTreino&dia=${encodeURIComponent(
+          dia
+        )}`;
+
+        fetch(url)
+          .then((response) => response.json())
+          .then((exercicios) => {
             const select = document.getElementById("exercicioTreino");
-            select.innerHTML = '<option value="">Selecione um exercício</option>';
+            select.innerHTML =
+              '<option value="">Selecione um exercício</option>';
 
             // Itera sobre as chaves do objeto JSON (nomes dos exercícios)
-            Object.keys(exercicios).forEach(nomeExercicio => {
-                const option = document.createElement("option");
-                option.value = nomeExercicio;
-                option.textContent = nomeExercicio;
-                select.appendChild(option);
+            Object.keys(exercicios).forEach((nomeExercicio) => {
+              const option = document.createElement("option");
+              option.value = nomeExercicio;
+              option.textContent = nomeExercicio;
+              select.appendChild(option);
             });
-        })
-        .catch(error => console.error("Erro ao carregar exercícios:", error));
-}
+            carregandoOff();
+          })
+          .catch((error) =>{
+            console.error("Erro ao carregar exercícios:", error);
+            carregandoOff();
+          }
+          );
+      }
 
-function carregarTreinoDoDiaUltimaCarga() {
-    const dia = document.getElementById("diaVisualizar").value;
-    if (!dia) return;
+      function carregarTreinoDoDiaUltimaCarga() {
+        const dia = document.getElementById("diaVisualizar").value;
+        if (!dia) return;
 
-    // Primeiro, carrega os exercícios da Ficha de Treino
-    fetch(`${urlBase}?sheet=FichasTreino&dia=${encodeURIComponent(dia)}`)
-        .then(response => response.json())
-        .then(fichas => {
-            const urlRegistros = `${urlBase}?sheet=RegistrosTreino&dia=${encodeURIComponent(dia)}`;
+        const tabela = document.getElementById("tabelaTreino");
+        tabela.innerHTML = "";
+        carregandoOn();
+
+        // Primeiro, carrega os exercícios da Ficha de Treino
+        fetch(`${urlBase}?sheet=FichasTreino&dia=${encodeURIComponent(dia)}`)
+          .then((response) => response.json())
+          .then((fichas) => {
+            const urlRegistros = `${urlBase}?sheet=RegistrosTreino&dia=${encodeURIComponent(
+              dia
+            )}`;
 
             // Depois, carrega os registros de treino (últimas cargas)
             fetch(urlRegistros)
-                .then(response => response.json())
-                .then(registros => {
-                    const tabela = document.getElementById("tabelaTreino");
-                    tabela.innerHTML = ""; // Limpa a tabela antes de adicionar novos dados
+              .then((response) => response.json())
+              .then((registros) => {
+                const tabela = document.getElementById("tabelaTreino");
+                tabela.innerHTML = ""; // Limpa a tabela antes de adicionar novos dados
 
-                    // Se fichas vier vazia, exibir uma mensagem
-                    if (Object.keys(fichas).length === 0) {
-                        tabela.innerHTML = `<tr><td colspan="5">Nenhum exercício cadastrado para esse dia.</td></tr>`;
-                        return;
-                    }
+                // Se fichas vier vazia, exibir uma mensagem
+                if (Object.keys(fichas).length === 0) {
+                  carregandoOff();
+                  tabela.innerHTML = `<tr><td colspan="5">Nenhum exercício cadastrado para esse dia.</td></tr>`;
+                  return;
+                }
 
-                    // Preenche a tabela combinando as informações das duas abas
-                    Object.entries(fichas).forEach(([nomeExercicio, dados]) => {
-                        let ultimaCarga = registros[nomeExercicio].carga || 0; // Se não houver registro, define carga como 0
+                // Preenche a tabela combinando as informações das duas abas
+                Object.entries(fichas).forEach(([nomeExercicio, dados]) => {
+                  if (!registros[nomeExercicio]) {
+                    registros[nomeExercicio] = { carga: 0 }; // Inicializa com um valor padrão
+                  }
+                  let ultimaCarga = registros[nomeExercicio].carga; // Se não houver registro, define carga como 0
 
-                        let row = `<tr>
+                  let row = `<tr>
                             <td>${nomeExercicio || "-"}</td>
                             <td>${dados.series || "-"}</td>
                             <td>${dados.repeticoes || "-"}</td>
                             <td>${dados.descanso || "-"}</td>
-                            <td>${ultimaCarga}</td>
+                            <td>${ultimaCarga == 0 ? "Valores não atribuidos" : ultimaCarga}</td>
                         </tr>`;
-                        tabela.innerHTML += row;
-                    });
-                })
-                .catch(error => console.error("Erro ao carregar registros de treino:", error));
-        })
-        .catch(error => console.error("Erro ao carregar ficha de treino:", error));
-}
+                  tabela.innerHTML += row;
+                });
+              })
+              .catch((error) =>{
+                console.error("Erro ao carregar registros de treino:", error);
+                carregandoOff();}
+              );
+              carregandoOff()
+          })
+          .catch((error) =>{
+            console.error("Erro ao carregar ficha de treino:", error);
+            carregandoOff();}
+          );
+          
+      }
 
-function cadastrarFichaComJson() {
-    const jsonInput = document.getElementById("jsonFicha").value;
+      function cadastrarFichaComJson() {
+        const jsonInput = document.getElementById("jsonFicha").value;
 
-    try {
-        console.log("Iniciando o processamento do JSON...");
-        const ficha = JSON.parse(jsonInput);
+        try {
+          console.log("Iniciando o processamento do JSON...");
+          const ficha = JSON.parse(jsonInput);
 
-        // Verifica se o JSON tem os dias da semana (Segunda a Domingo)
-        const diasDaSemana = ['Segunda-feira', 'Terça-feira', 'Quarta-feira', 'Quinta-feira', 'Sexta-feira', 'Sábado', 'Domingo'];
-        for (let dia of diasDaSemana) {
+          // Verifica se o JSON tem os dias da semana (Segunda a Domingo)
+          const diasDaSemana = [
+            "Segunda-feira",
+            "Terça-feira",
+            "Quarta-feira",
+            "Quinta-feira",
+            "Sexta-feira",
+            "Sábado",
+            "Domingo",
+          ];
+          for (let dia of diasDaSemana) {
             if (!ficha[dia]) {
-                alert(`Falta o treino para o dia: ${dia}`);
-                console.log(`Erro: Falta o treino para o dia: ${dia}`);
-                return;
+              alert(`Falta o treino para o dia: ${dia}`);
+              console.log(`Erro: Falta o treino para o dia: ${dia}`);
+              return;
             }
-        }
+          }
 
-        console.log("Estrutura do JSON verificada com sucesso.");
+          console.log("Estrutura do JSON verificada com sucesso.");
 
-        // Para cada dia e exercício, chama a função cadastrarTreino
-        for (let dia in ficha) {
+          // Para cada dia e exercício, chama a função cadastrarTreino
+          for (let dia in ficha) {
             const exercicios = ficha[dia];
             console.log(`Processando o treino de ${dia}:`);
             for (let nomeExercicio in exercicios) {
-                const treino = exercicios[nomeExercicio];
-                const dadosTreino = {
-                    dia: dia,
-                    exercicio: nomeExercicio,
-                    series: treino.series,
-                    repeticoes: treino.repeticoes,
-                    descanso: treino.descanso
-                };
-                console.log(`Cadastro do exercício: ${nomeExercicio}`);
-                console.log(`Dia:${dia} Séries: ${dadosTreino.series}, Repetições: ${dadosTreino.repeticoes}, Descanso: ${dadosTreino.descanso}`);
-                cadastrarTreino(dadosTreino);
-                
+              const treino = exercicios[nomeExercicio];
+              const dadosTreino = {
+                dia: dia,
+                exercicio: nomeExercicio,
+                series: treino.series,
+                repeticoes: treino.repeticoes,
+                descanso: treino.descanso,
+              };
+              console.log(`Cadastro do exercício: ${nomeExercicio}`);
+              console.log(
+                `Dia:${dia} Séries: ${dadosTreino.series}, Repetições: ${dadosTreino.repeticoes}, Descanso: ${dadosTreino.descanso}`
+              );
+              cadastrarTreino(dadosTreino);
             }
+          }
+          console.log("Todos os treinos foram cadastrados com sucesso.");
+        } catch (error) {
+          alert("Erro ao processar o JSON. Verifique a estrutura.");
+          console.error("Erro no processamento do JSON:", error);
         }
-        console.log("Todos os treinos foram cadastrados com sucesso.");
-    } catch (error) {
-        alert("Erro ao processar o JSON. Verifique a estrutura.");
-        console.error("Erro no processamento do JSON:", error);
-    }
-}
-
-
+      }
     </script>
-</body>
+  </body>
 </html>
