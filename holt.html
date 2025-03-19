@@ -3,504 +3,211 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Treino e Agenda</title>
+    <title>Diagrama de Holten - 1RM</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
       body {
-          font-family: Arial, sans-serif;
-          background-color: #121212;
-          color: white;
-          text-align: center;
-          margin: 0;
-          padding: 0;
+        background-color: #121212;
+        color: #ffffff;
+        font-family: Arial, sans-serif;
+        text-align: center;
+        padding: 20px;
       }
-      .container {
-          max-width: 90%;
-          margin: 20px auto;
-          padding: 20px;
-          background: #1e1e1e;
-          border-radius: 10px;
-          box-shadow: 0px 0px 10px rgba(255, 255, 255, 0.1);
+      h2 {
+        color: #bb86fc;
       }
-      select, input, button, textarea {
-          width: 100%;
-          padding: 10px;
-          margin: 10px 0;
-          border: none;
-          border-radius: 5px;
-      }
-      select, input, textarea {
-          background-color: #2a2a2a;
-          color: white;
-      }
+      input,
       button {
-          background-color: #6200ea;
-          color: white;
-          font-weight: bold;
-          cursor: pointer;
+        background-color: #1e1e1e;
+        border: 1px solid #bb86fc;
+        color: #ffffff;
+        padding: 10px;
+        margin: 5px;
+        border-radius: 5px;
       }
       button:hover {
-          background-color: #3700b3;
+        background-color: #bb86fc;
+        color: #121212;
       }
-      .hidden {
-          display: none;
+      canvas {
+        margin-top: 20px;
+        background-color: #1e1e1e;
+        padding: 10px;
+        border-radius: 10px;
       }
       table {
-          width: 100%;
-          border-collapse: collapse;
-          margin-top: 20px;
-          background: #2a2a2a;
-          border-radius: 8px;
-          overflow: hidden;
+        width: 80%;
+        margin: 20px auto;
+        border-collapse: collapse;
+        background-color: #1e1e1e;
       }
-      th, td {
-          padding: 10px;
-          border: 1px solid #444;
+      th,
+      td {
+        border: 1px solid #bb86fc;
+        padding: 10px;
+        text-align: center;
       }
       th {
-          background-color: #6200ea;
-          color: white;
+        background-color: #bb86fc;
+        color: #121212;
       }
-      td {
-          color: white;
+      #btnVoltar {
+        display: inline-flex;
+        align-items: center;
+        padding: 10px 15px;
+        background-color: #bb86fc;
+        color: white;
+        border-radius: 5px;
+        cursor: pointer;
+        font-size: 16px;
+        transition: background-color 0.3s ease;
       }
-      @media (max-width: 600px) {
-          table, thead, tbody, th, td, tr {
-              display: block;
-          }
-          tr {
-              margin-bottom: 10px;
-          }
-          th {
-              display: none;
-          }
-          td {
-              position: relative;
-              padding-left: 50%;
-              text-align: right;
-          }
-          td:before {
-              content: attr(data-label);
-              position: absolute;
-              left: 10px;
-              width: 45%;
-              padding-right: 10px;
-              text-align: left;
-              font-weight: bold;
-          }
+
+      #btnVoltar:hover {
+        border: 1px solid #bb86fc;
+        background-color: #1e1e1e;
       }
-      .loading-overlay {
-            display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0, 0, 0, 0.7);
-            justify-content: center;
-            align-items: center;
-            z-index: 1000;
-        }
-        .loading-spinner {
-            width: 50px;
-            height: 50px;
-            border: 5px solid white;
-            border-top: 5px solid purple;
-            border-radius: 50%;
-            animation: spin 1s linear infinite;
-        }
-        @keyframes spin {
-            from { transform: rotate(0deg); }
-            to { transform: rotate(360deg); }
-        }
-  </style>
+
+      #btnVoltar:active {
+        background-color: #004085;
+      }
+    </style>
   </head>
   <body>
-    <div class="container">
-      <h2>Escolha uma opção</h2>
-      <select id="modo" onchange="alternarModo()">
-        <option value="">Selecione</option>
-        <option value="cadastroJson">Cadastrar Ficha de Treino com json</option>
-        <option value="cadastro">Cadastrar Ficha de Treino</option>
-        <option value="agenda">Usar Agenda de Treino</option>
-        <option value="visualizar">Visualizar Treino</option>
-        <option value="holt">Diagrama de Holten </option>
-      </select>
-
-      <div id="formCadastro" class="hidden">
-        <textarea
-          id="jsonFicha"
-          rows="10"
-          cols="50"
-          placeholder="Cole o JSON da ficha de treino aqui"
-        ></textarea
-        ><br /><br />
-        <button onclick="cadastrarFichaComJson()">
-          Cadastrar Ficha de Treino
-        </button>
-      </div>
-
-      <div id="cadastroTreino" class="hidden">
-        <h2>Cadastro de Ficha de Treino</h2>
-        <label for="dia">Dia da Semana:</label>
-        <select id="dia">
-          <option value="">Selecione um dia</option>
-          <option value="Segunda-feira">Segunda-feira</option>
-          <option value="Terça-feira">Terça-feira</option>
-          <option value="Quarta-feira">Quarta-feira</option>
-          <option value="Quinta-feira">Quinta-feira</option>
-          <option value="Sexta-feira">Sexta-feira</option>
-          <option value="Sábado">Sábado</option>
-          <option value="Domingo">Domingo</option>
-        </select>
-
-        <label for="exercicio">Exercício:</label>
-        <input type="text" id="exercicio" placeholder="Digite o exercício" />
-
-        <input type="number" id="series" placeholder="Séries" />
-        <input type="number" id="repeticoes" placeholder="Repetições" />
-        <input type="text" id="descanso" placeholder="Descanso" />
-        <button onclick="cadastrarTreino()">Cadastrar Treino</button>
-      </div>
-
-      <div id="agendaTreino" class="hidden">
-        <h2>Agenda de Treino</h2>
-        <label for="diaTreino">Dia da Semana:</label>
-        <select id="diaTreino" onchange="carregarExerciciosAgenda()">
-          <option value="">Selecione um dia</option>
-          <option value="Segunda-feira">Segunda-feira</option>
-          <option value="Terça-feira">Terça-feira</option>
-          <option value="Quarta-feira">Quarta-feira</option>
-          <option value="Quinta-feira">Quinta-feira</option>
-          <option value="Sexta-feira">Sexta-feira</option>
-          <option value="Sábado">Sábado</option>
-          <option value="Domingo">Domingo</option>
-        </select>
-        <select id="exercicioTreino">
-          <option value="">Selecione um dia primeiro</option>
-        </select>
-        <input type="number" id="seriesFeitas" placeholder="Séries Feitas" />
-        <input type="number" id="carga" placeholder="Carga (kg)" />
-        <input type="number" id="repsFeitas" placeholder="Repetições" />
-        <input type="text" id="descansoFeito" placeholder="Descanso" />
-        <input type="text" id="equipamentos" placeholder="Equipamentos" />
-        <button onclick="registrarTreino()">Registrar Treino</button>
-      </div>
-
-      <div id="visualizarTreino" class="hidden">
-        <h2>Visualizar Treino</h2>
-        <label for="diaVisualizar">Dia da Semana:</label>
-        <select id="diaVisualizar" onchange="carregarTreinoDoDiaUltimaCarga()">
-          <option value="">Selecione um dia</option>
-          <option value="Segunda-feira">Segunda-feira</option>
-          <option value="Terça-feira">Terça-feira</option>
-          <option value="Quarta-feira">Quarta-feira</option>
-          <option value="Quinta-feira">Quinta-feira</option>
-          <option value="Sexta-feira">Sexta-feira</option>
-          <option value="Sábado">Sábado</option>
-          <option value="Domingo">Domingo</option>
-        </select>
-        <table>
-          <thead>
-            <tr>
-              <th>Exercício</th>
-              <th>Séries</th>
-              <th>Repetições</th>
-              <th>Descanso</th>
-              <th>Última Carga (kg)</th>
-            </tr>
-          </thead>
-          <tbody id="tabelaTreino"></tbody>
-        </table>
-      </div>
-    </div>
-    <div class="loading-overlay" id="loadingOverlay">
-      <div class="loading-spinner"></div>
-  </div>
+    <span id="btnVoltar" onclick="voltar()"> 🏠 voltar </span>
+    <h2>Diagrama de Holten | Cálculo de 1RM</h2>
+    <label for="peso">Peso levantado (kg): </label>
+    <input type="number" id="peso" value="50" />
+    <label for="reps">Repetições: </label>
+    <input type="number" id="reps" value="10" />
+    <button onclick="calcular1RM()">Calcular</button>
+    <p id="resultado"></p>
+    <canvas id="holtenChart"></canvas>
+    <table id="tabelaPesos"></table>
 
     <script>
-      function carregandoOn() {
-            document.getElementById("loadingOverlay").style.display = "flex";
-        }
-        function carregandoOff() {
-            document.getElementById("loadingOverlay").style.display = "none";
-        }
-      urlBase =
-        "https://script.google.com/macros/s/AKfycbyviFs9MB13IPH56GqNAppLv6b_w1dm9qjR0o-7DV5OscaVZDsM6n3iqzGyZZa2mlaY/exec";
-      function registrarTreino() {
-        const url = urlBase; // Substitua pela URL do Apps Script
-        const dia = document.getElementById("diaTreino").value;
-        const exercicio = document.getElementById("exercicioTreino").value;
-        const seriesFeitas = document.getElementById("seriesFeitas").value;
-        const carga = document.getElementById("carga").value;
-        const repsFeitas = document.getElementById("repsFeitas").value;
-        const descansoFeito = document.getElementById("descansoFeito").value;
-        const equipamentos = document.getElementById("equipamentos").value;
+      function voltar() {
+        window.location.href = "index.html";
+      }
+      const ctx = document.getElementById("holtenChart").getContext("2d");
+      let chartInstance = null;
 
-        if (
-          !dia ||
-          !exercicio ||
-          !seriesFeitas ||
-          !carga ||
-          !repsFeitas ||
-          !descansoFeito ||
-          !equipamentos
-        ) {
-          alert("Preencha todos os campos!");
+      const fatoresHolten = [
+        1.0, 0.95, 0.93, 0.9, 0.88, 0.86, 0.83, 0.81, 0.78, 0.75, 0.7, 0.67,
+        0.65, 0.63, 0.6, 0.58, 0.55, 0.53, 0.5, 0.48,
+      ];
+
+      function calcular1RM() {
+        let peso = parseFloat(document.getElementById("peso").value);
+        let repeticoes = parseInt(document.getElementById("reps").value);
+
+        if (repeticoes < 1 || repeticoes > 20) {
+          document.getElementById("resultado").innerText =
+            "O número de repetições deve estar entre 1 e 20.";
           return;
         }
 
-        const dados = {
-          tipo: "registro", // Especificando que é um registro de treino
-          dia: dia,
-          exercicio: exercicio,
-          seriesFeitas: seriesFeitas,
-          carga: carga,
-          repsFeitas: repsFeitas,
-          descansoFeito: descansoFeito,
-          equipamentos: equipamentos,
-        };
-
-        fetch(url, {
-          method: "POST",
-          mode: "no-cors",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(dados),
-        })
-          .then(() => {
-            alert("Treino registrado com sucesso!");
-            document.getElementById("seriesFeitas").value = "";
-            document.getElementById("carga").value = "";
-            document.getElementById("repsFeitas").value = "";
-            document.getElementById("descansoFeito").value = "";
-            document.getElementById("equipamentos").value = "";
-          })
-          .catch((error) => console.error("Erro ao registrar treino:", error));
+        let fator = fatoresHolten[repeticoes - 1];
+        let rm = peso / fator;
+        document.getElementById(
+          "resultado"
+        ).innerText = `Estimativa de 1RM: ${rm.toFixed(2)} kg`;
+        atualizarGrafico(rm, repeticoes);
+        atualizarTabela(rm);
       }
 
-      function cadastrarTreino(dadosTreino = null) {
-        const url = urlBase; // Substitua pela URL do Apps Script
-        let dia, exercicio, series, repeticoes, descanso;
+      function atualizarGrafico(rm, repeticoes) {
+        let limiteReps =
+          repeticoes < 6 ? 5 : repeticoes < 11 ? 10 : repeticoes < 16 ? 15 : 20;
+        let dados = fatoresHolten.slice(0, limiteReps).map((f) => rm * f);
+        let labels = Array.from({ length: limiteReps }, (_, i) => i + 1);
 
-        // Verificar se dadosTreino foi passado como parâmetro
-        if (dadosTreino != null) {
-          // Se sim, usa os valores de dadosTreino
-          dia = dadosTreino.dia;
-          exercicio = dadosTreino.exercicio;
-          series = dadosTreino.series;
-          repeticoes = dadosTreino.repeticoes;
-          descanso = dadosTreino.descanso;
-        } else {
-          dia = document.getElementById("dia").value;
-          exercicio = document.getElementById("exercicio").value;
-          series = document.getElementById("series").value;
-          repeticoes = document.getElementById("repeticoes").value;
-          descanso = document.getElementById("descanso").value;
-        }
-        if (!dia || !exercicio || !series || !repeticoes || !descanso) {
-          console.log(
-            "1. Preencha todos os campos! " +
-              dia +
-              " " +
-              exercicio +
-              " " +
-              series +
-              " " +
-              repeticoes +
-              " " +
-              descanso
-          );
-          return;
+        if (chartInstance) {
+          chartInstance.destroy();
         }
 
-        const dados = {
-          tipo: "ficha", // Especificando que é uma ficha de treino
-          dia: dia,
-          exercicio: exercicio,
-          series: series,
-          repeticoes: repeticoes,
-          descanso: descanso,
-        };
-
-        fetch(url, {
-          method: "POST",
-          mode: "no-cors",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(dados),
-        })
-          .then(() => {
-            alert("Ficha cadastrada com sucesso!");
-            document.getElementById("dia").value = "";
-            document.getElementById("exercicio").value = "";
-            document.getElementById("series").value = "";
-            document.getElementById("repeticoes").value = "";
-            document.getElementById("descanso").value = "";
-          })
-          .catch((error) => console.error("Erro ao cadastrar ficha:", error));
+        chartInstance = new Chart(ctx, {
+          type: "line",
+          data: {
+            labels: labels,
+            datasets: [
+              {
+                label: "Carga Estimada (kg)",
+                data: dados,
+                borderColor: "#bb86fc",
+                backgroundColor: "rgba(187, 134, 252, 0.2)",
+                fill: true,
+                tension: 0.4,
+              },
+            ],
+          },
+          options: {
+            responsive: true,
+            scales: {
+              x: {
+                title: { display: true, text: "Repetições", color: "#ffffff" },
+                ticks: { color: "#ffffff" },
+              },
+              y: {
+                title: { display: true, text: "Carga (kg)", color: "#ffffff" },
+                ticks: { color: "#ffffff" },
+              },
+            },
+            plugins: { legend: { labels: { color: "#ffffff" } } },
+          },
+        });
       }
 
-      function alternarModo() {
-            const modo = document.getElementById("modo").value;
-            document.getElementById("formCadastro").classList.add("hidden");
-            document.getElementById("cadastroTreino").classList.add("hidden");
-            document.getElementById("visualizarTreino").classList.add("hidden");
-            document.getElementById("agendaTreino").classList.add("hidden");
+      function atualizarTabela(rm) {
+        let pesos = [
+          1.0, 0.95, 0.9, 0.85, 0.8, 0.75, 0.7, 0.65, 0.6, 0.55, 0.5, 0.45, 0.4,
+          0.35, 0.3,
+        ];
+        let anilhas = [20, 15, 10, 5, 2.5];
+        let tabela = `<tr><th>% 1RM</th><th>Peso (kg)</th><th>Peso arred total(kg)</th><th>Anilhas (sem barra)</th><th>Anilhas (com barra)</th></tr>`;
 
-            if (modo === "cadastroJson") {
-                document.getElementById("formCadastro").classList.remove("hidden");
-            } else if (modo === "cadastro") {
-                document.getElementById("cadastroTreino").classList.remove("hidden");
-            } else if (modo === "visualizar") {
-                document.getElementById("visualizarTreino").classList.remove("hidden");
-            }else if(modo === "agenda"){
-                document.getElementById("agendaTreino").classList.remove("hidden");
-            } else if (modo === "holt"){
-              window.location.href = "holt.html";
-            }
-        }
+        pesos.forEach((p) => {
+          let carga = (rm * p).toFixed(2);
+          let cargaComBarra = (carga - 20).toFixed(2);
+          tabela += `<tr><td>${(p * 100).toFixed(
+            0
+          )}%</td><td>${carga} kg</td><td>${calcularPesoPosivel(
+            carga
+          )} kg</td><td>${calcularAnilhas(carga)}</td><td>${calcularAnilhas(
+            cargaComBarra
+          )}</td></tr>`;
+        });
+        document.getElementById("tabelaPesos").innerHTML = tabela;
+      }
 
-      function carregarExerciciosAgenda() {
-        const dia = document.getElementById("diaTreino").value;
-        if (!dia) return;
-        carregandoOn();
-        const url = `${urlBase}?sheet=FichasTreino&dia=${encodeURIComponent(
-          dia
-        )}`;
+      function calcularAnilhas(peso) {
+        if (peso < 0) return "-";
+        let restante = peso / 2;
+        let resultado = [];
 
-        fetch(url)
-          .then((response) => response.json())
-          .then((exercicios) => {
-            const select = document.getElementById("exercicioTreino");
-            select.innerHTML =
-              '<option value="">Selecione um exercício</option>';
-
-            // Itera sobre as chaves do objeto JSON (nomes dos exercícios)
-            Object.keys(exercicios).forEach((nomeExercicio) => {
-              const option = document.createElement("option");
-              option.value = nomeExercicio;
-              option.textContent = nomeExercicio;
-              select.appendChild(option);
-            });
-            carregandoOff();
-          })
-          .catch((error) =>{
-            console.error("Erro ao carregar exercícios:", error);
-            carregandoOff();
+        [20, 15, 10, 5, 2.5].forEach((a) => {
+          let qtd = Math.floor(restante / a);
+          if (qtd > 0) {
+            resultado.push(`${qtd}x${a}kg`);
+            restante -= qtd * a;
           }
-          );
+        });
+        return resultado.length > 0 ? resultado.join(", ") : "0";
       }
 
-      function carregarTreinoDoDiaUltimaCarga() {
-        const dia = document.getElementById("diaVisualizar").value;
-        if (!dia) return;
+      function calcularPesoPosivel(peso) {
+        if (peso < 0) return "-";
+        let restante = peso;
+        let resultado = 0;
 
-        const tabela = document.getElementById("tabelaTreino");
-        tabela.innerHTML = "";
-        carregandoOn();
-
-        // Primeiro, carrega os exercícios da Ficha de Treino
-        fetch(`${urlBase}?sheet=FichasTreino&dia=${encodeURIComponent(dia)}`)
-          .then((response) => response.json())
-          .then((fichas) => {
-            const urlRegistros = `${urlBase}?sheet=RegistrosTreino&dia=${encodeURIComponent(
-              dia
-            )}`;
-
-            // Depois, carrega os registros de treino (últimas cargas)
-            fetch(urlRegistros)
-              .then((response) => response.json())
-              .then((registros) => {
-                const tabela = document.getElementById("tabelaTreino");
-                tabela.innerHTML = ""; // Limpa a tabela antes de adicionar novos dados
-
-                // Se fichas vier vazia, exibir uma mensagem
-                if (Object.keys(fichas).length === 0) {
-                  carregandoOff();
-                  tabela.innerHTML = `<tr><td colspan="5">Nenhum exercício cadastrado para esse dia.</td></tr>`;
-                  return;
-                }
-
-                // Preenche a tabela combinando as informações das duas abas
-                Object.entries(fichas).forEach(([nomeExercicio, dados]) => {
-                  if (!registros[nomeExercicio]) {
-                    registros[nomeExercicio] = { carga: 0 }; // Inicializa com um valor padrão
-                  }
-                  let ultimaCarga = registros[nomeExercicio].carga; // Se não houver registro, define carga como 0
-
-                  let row = `<tr>
-                            <td>${nomeExercicio || "-"}</td>
-                            <td>${dados.series || "-"}</td>
-                            <td>${dados.repeticoes || "-"}</td>
-                            <td>${dados.descanso || "-"}</td>
-                            <td>${ultimaCarga == 0 ? "Valores não atribuidos" : ultimaCarga}</td>
-                        </tr>`;
-                  tabela.innerHTML += row;
-                });
-              })
-              .catch((error) =>{
-                console.error("Erro ao carregar registros de treino:", error);
-                carregandoOff();}
-              );
-              carregandoOff()
-          })
-          .catch((error) =>{
-            console.error("Erro ao carregar ficha de treino:", error);
-            carregandoOff();}
-          );
-          
-      }
-
-      function cadastrarFichaComJson() {
-        const jsonInput = document.getElementById("jsonFicha").value;
-
-        try {
-          console.log("Iniciando o processamento do JSON...");
-          const ficha = JSON.parse(jsonInput);
-
-          // Verifica se o JSON tem os dias da semana (Segunda a Domingo)
-          const diasDaSemana = [
-            "Segunda-feira",
-            "Terça-feira",
-            "Quarta-feira",
-            "Quinta-feira",
-            "Sexta-feira",
-            "Sábado",
-            "Domingo",
-          ];
-          for (let dia of diasDaSemana) {
-            if (!ficha[dia]) {
-              alert(`Falta o treino para o dia: ${dia}`);
-              console.log(`Erro: Falta o treino para o dia: ${dia}`);
-              return;
-            }
+        [20, 15, 10, 5, 2.5].forEach((a) => {
+          let qtd = Math.floor(restante / a);
+          if (qtd > 0) {
+            resultado += qtd * a;
+            restante -= qtd * a;
           }
-
-          console.log("Estrutura do JSON verificada com sucesso.");
-
-          // Para cada dia e exercício, chama a função cadastrarTreino
-          for (let dia in ficha) {
-            const exercicios = ficha[dia];
-            console.log(`Processando o treino de ${dia}:`);
-            for (let nomeExercicio in exercicios) {
-              const treino = exercicios[nomeExercicio];
-              const dadosTreino = {
-                dia: dia,
-                exercicio: nomeExercicio,
-                series: treino.series,
-                repeticoes: treino.repeticoes,
-                descanso: treino.descanso,
-              };
-              console.log(`Cadastro do exercício: ${nomeExercicio}`);
-              console.log(
-                `Dia:${dia} Séries: ${dadosTreino.series}, Repetições: ${dadosTreino.repeticoes}, Descanso: ${dadosTreino.descanso}`
-              );
-              cadastrarTreino(dadosTreino);
-            }
-          }
-          console.log("Todos os treinos foram cadastrados com sucesso.");
-        } catch (error) {
-          alert("Erro ao processar o JSON. Verifique a estrutura.");
-          console.error("Erro no processamento do JSON:", error);
-        }
+        });
+        return resultado;
       }
     </script>
   </body>
