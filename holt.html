@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="pt">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Diagrama de Holten - 1RM</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+      body {
+        background-color: #121212;
+        color: #ffffff;
+        font-family: Arial, sans-serif;
+        text-align: center;
+        padding: 20px;
+      }
+      h2 {
+        color: #bb86fc;
+      }
+      input,
+      button {
+        background-color: #1e1e1e;
+        border: 1px solid #bb86fc;
+        color: #ffffff;
+        padding: 10px;
+        margin: 5px;
+        border-radius: 5px;
+      }
+      button:hover {
+        background-color: #bb86fc;
+        color: #121212;
+      }
+      canvas {
+        margin-top: 20px;
+        background-color: #1e1e1e;
+        padding: 10px;
+        border-radius: 10px;
+      }
+      table {
+        width: 80%;
+        margin: 20px auto;
+        border-collapse: collapse;
+        background-color: #1e1e1e;
+      }
+      th,
+      td {
+        border: 1px solid #bb86fc;
+        padding: 10px;
+        text-align: center;
+      }
+      th {
+        background-color: #bb86fc;
+        color: #121212;
+      }
+      #btnVoltar {
+        display: inline-flex;
+        align-items: center;
+        padding: 10px 15px;
+        background-color: #bb86fc;
+        color: white;
+        border-radius: 5px;
+        cursor: pointer;
+        font-size: 16px;
+        transition: background-color 0.3s ease;
+      }
+
+      #btnVoltar:hover {
+        border: 1px solid #bb86fc;
+        background-color: #1e1e1e;
+      }
+
+      #btnVoltar:active {
+        background-color: #004085;
+      }
+    </style>
+  </head>
+  <body>
+    <span id="btnVoltar" onclick="voltar()"> 🏠 voltar </span>
+    <h2>Diagrama de Holten | Cálculo de 1RM</h2>
+    <label for="peso">Peso levantado (kg): </label>
+    <input type="number" id="peso" value="50" />
+    <label for="reps">Repetições: </label>
+    <input type="number" id="reps" value="10" />
+    <button onclick="calcular1RM()">Calcular</button>
+    <p id="resultado"></p>
+    <canvas id="holtenChart"></canvas>
+    <table id="tabelaPesos"></table>
+
+    <script>
+      function voltar() {
+        window.location.href = "index.html";
+      }
+      const ctx = document.getElementById("holtenChart").getContext("2d");
+      let chartInstance = null;
+
+      const fatoresHolten = [
+        1.0, 0.95, 0.93, 0.9, 0.88, 0.86, 0.83, 0.81, 0.78, 0.75, 0.7, 0.67,
+        0.65, 0.63, 0.6, 0.58, 0.55, 0.53, 0.5, 0.48,
+      ];
+
+      function calcular1RM() {
+        let peso = parseFloat(document.getElementById("peso").value);
+        let repeticoes = parseInt(document.getElementById("reps").value);
+
+        if (repeticoes < 1 || repeticoes > 20) {
+          document.getElementById("resultado").innerText =
+            "O número de repetições deve estar entre 1 e 20.";
+          return;
+        }
+
+        let fator = fatoresHolten[repeticoes - 1];
+        let rm = peso / fator;
+        document.getElementById(
+          "resultado"
+        ).innerText = `Estimativa de 1RM: ${rm.toFixed(2)} kg`;
+        atualizarGrafico(rm, repeticoes);
+        atualizarTabela(rm);
+      }
+
+      function atualizarGrafico(rm, repeticoes) {
+        let limiteReps =
+          repeticoes < 6 ? 5 : repeticoes < 11 ? 10 : repeticoes < 16 ? 15 : 20;
+        let dados = fatoresHolten.slice(0, limiteReps).map((f) => rm * f);
+        let labels = Array.from({ length: limiteReps }, (_, i) => i + 1);
+
+        if (chartInstance) {
+          chartInstance.destroy();
+        }
+
+        chartInstance = new Chart(ctx, {
+          type: "line",
+          data: {
+            labels: labels,
+            datasets: [
+              {
+                label: "Carga Estimada (kg)",
+                data: dados,
+                borderColor: "#bb86fc",
+                backgroundColor: "rgba(187, 134, 252, 0.2)",
+                fill: true,
+                tension: 0.4,
+              },
+            ],
+          },
+          options: {
+            responsive: true,
+            scales: {
+              x: {
+                title: { display: true, text: "Repetições", color: "#ffffff" },
+                ticks: { color: "#ffffff" },
+              },
+              y: {
+                title: { display: true, text: "Carga (kg)", color: "#ffffff" },
+                ticks: { color: "#ffffff" },
+              },
+            },
+            plugins: { legend: { labels: { color: "#ffffff" } } },
+          },
+        });
+      }
+
+      function atualizarTabela(rm) {
+        let pesos = [
+          1.0, 0.95, 0.9, 0.85, 0.8, 0.75, 0.7, 0.65, 0.6, 0.55, 0.5, 0.45, 0.4,
+          0.35, 0.3,
+        ];
+        let anilhas = [20, 15, 10, 5, 2.5];
+        let tabela = `<tr><th>% 1RM</th><th>Peso (kg)</th><th>Peso arred total(kg)</th><th>Anilhas (sem barra)</th><th>Anilhas (com barra)</th></tr>`;
+
+        pesos.forEach((p) => {
+          let carga = (rm * p).toFixed(2);
+          let cargaComBarra = (carga - 20).toFixed(2);
+          tabela += `<tr><td>${(p * 100).toFixed(
+            0
+          )}%</td><td>${carga} kg</td><td>${calcularPesoPosivel(
+            carga
+          )} kg</td><td>${calcularAnilhas(carga)}</td><td>${calcularAnilhas(
+            cargaComBarra
+          )}</td></tr>`;
+        });
+        document.getElementById("tabelaPesos").innerHTML = tabela;
+      }
+
+      function calcularAnilhas(peso) {
+        if (peso < 0) return "-";
+        let restante = peso / 2;
+        let resultado = [];
+
+        [20, 15, 10, 5, 2.5].forEach((a) => {
+          let qtd = Math.floor(restante / a);
+          if (qtd > 0) {
+            resultado.push(`${qtd}x${a}kg`);
+            restante -= qtd * a;
+          }
+        });
+        return resultado.length > 0 ? resultado.join(", ") : "0";
+      }
+
+      function calcularPesoPosivel(peso) {
+        if (peso < 0) return "-";
+        let restante = peso;
+        let resultado = 0;
+
+        [20, 15, 10, 5, 2.5].forEach((a) => {
+          let qtd = Math.floor(restante / a);
+          if (qtd > 0) {
+            resultado += qtd * a;
+            restante -= qtd * a;
+          }
+        });
+        return resultado;
+      }
+    </script>
+  </body>
+</html>
