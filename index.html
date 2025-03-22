@@ -6,143 +6,151 @@
     <title>Treino e Agenda</title>
     <style>
       body {
-          font-family: Arial, sans-serif;
-          background-color: #121212;
-          color: white;
-          text-align: center;
-          margin: 0;
-          padding: 0;
+        font-family: Arial, sans-serif;
+        background-color: #121212;
+        color: white;
+        text-align: center;
+        margin: 0;
+        padding: 0;
       }
       .container {
-          max-width: 90%;
-          margin: 20px auto;
-          padding: 20px;
-          background: #1e1e1e;
-          border-radius: 10px;
-          box-shadow: 0px 0px 10px rgba(255, 255, 255, 0.1);
+        max-width: 90%;
+        margin: 20px auto;
+        padding: 20px;
+        background: #1e1e1e;
+        border-radius: 10px;
+        box-shadow: 0px 0px 10px rgba(255, 255, 255, 0.1);
       }
-      select, input, button, textarea {
-          width: 100%;
-          padding: 10px;
-          margin: 10px 0;
-          border: none;
-          border-radius: 5px;
+      select,
+      input,
+      button,
+      textarea {
+        width: 100%;
+        padding: 10px;
+        margin: 10px 0;
+        border: none;
+        border-radius: 5px;
       }
-      select, input, textarea {
-          background-color: #2a2a2a;
-          color: white;
+      select,
+      input,
+      textarea {
+        background-color: #2a2a2a;
+        color: white;
       }
       button {
-          background-color: #6200ea;
-          color: white;
-          font-weight: bold;
-          cursor: pointer;
+        background-color: #6200ea;
+        color: white;
+        font-weight: bold;
+        cursor: pointer;
       }
       button:hover {
-          background-color: #3700b3;
+        background-color: #3700b3;
       }
       .hidden {
-          display: none;
+        display: none;
       }
       table {
-          width: 100%;
-          border-collapse: collapse;
-          margin-top: 20px;
-          background: #2a2a2a;
-          border-radius: 8px;
-          overflow: hidden;
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 20px;
+        background: #2a2a2a;
+        border-radius: 8px;
+        overflow: hidden;
       }
-      th, td {
-          padding: 10px;
-          border: 1px solid #444;
+      th,
+      td {
+        padding: 10px;
+        border: 1px solid #444;
       }
       th {
-          background-color: #6200ea;
-          color: white;
+        background-color: #6200ea;
+        color: white;
       }
       td {
-          color: white;
+        color: white;
       }
-      @media (max-width: 600px) {
-          table, thead, tbody, th, td, tr {
-              display: block;
-          }
-          tr {
-              margin-bottom: 10px;
-          }
-          th {
-              display: none;
-          }
-          td {
-              position: relative;
-              padding-left: 50%;
-              text-align: right;
-          }
-          td:before {
-              content: attr(data-label);
-              position: absolute;
-              left: 10px;
-              width: 45%;
-              padding-right: 10px;
-              text-align: left;
-              font-weight: bold;
-          }
-      }
-      .loading-overlay {
+      /* Esconde a versão lista por padrão */
+      .list-container {
             display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0, 0, 0, 0.7);
-            justify-content: center;
-            align-items: center;
-            z-index: 1000;
         }
-        .loading-spinner {
-            width: 50px;
-            height: 50px;
-            border: 5px solid white;
-            border-top: 5px solid purple;
-            border-radius: 50%;
-            animation: spin 1s linear infinite;
+
+        /* Estilo para a versão de celular */
+        @media (max-width: 768px) {
+            .table-container {
+                display: none;
+            }
+
+            .list-container {
+                display: block;
+            }
+
+            .list-group {
+                border: 1px solid #ccc;
+                margin-bottom: 10px;
+                padding: 10px;
+                background-color: #6200ea;
+            }
+
+            .list-item {
+                font-size: 10px;
+                display: flex;
+                justify-content: space-between;
+                padding: 5px 0;
+                border-bottom: 1px solid #ddd;
+            }
+
+            .list-item:last-child {
+                border-bottom: none;
+            }
+
+            .list-item strong {
+                color: #00e4ea;
+            }
         }
-        @keyframes spin {
-            from { transform: rotate(0deg); }
-            to { transform: rotate(360deg); }
+
+      .loading-overlay {
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.7);
+        justify-content: center;
+        align-items: center;
+        z-index: 1000;
+      }
+      .loading-spinner {
+        width: 50px;
+        height: 50px;
+        border: 5px solid white;
+        border-top: 5px solid purple;
+        border-radius: 50%;
+        animation: spin 1s linear infinite;
+      }
+      @keyframes spin {
+        from {
+          transform: rotate(0deg);
         }
-  </style>
+        to {
+          transform: rotate(360deg);
+        }
+      }
+    </style>
   </head>
   <body>
     <div class="container">
       <h2>Escolha uma opção</h2>
       <select id="modo" onchange="alternarModo()">
-        <option value="">Selecione</option>
-        <option value="cadastroJson">Cadastrar Ficha de Treino com json</option>
-        <option value="cadastro">Cadastrar Ficha de Treino</option>
-        <option value="agenda">Usar Agenda de Treino</option>
         <option value="visualizar">Visualizar Treino</option>
-        <option value="holt">Diagrama de Holten </option>
+        <option value="agenda">Usar Agenda de Treino</option>
+        <option value="holt">Diagrama de Holten</option>
       </select>
 
-      <div id="formCadastro" class="hidden">
-        <textarea
-          id="jsonFicha"
-          rows="10"
-          cols="50"
-          placeholder="Cole o JSON da ficha de treino aqui"
-        ></textarea
-        ><br /><br />
-        <button onclick="cadastrarFichaComJson()">
-          Cadastrar Ficha de Treino
-        </button>
-      </div>
-
-      <div id="cadastroTreino" class="hidden">
-        <h2>Cadastro de Ficha de Treino</h2>
-        <label for="dia">Dia da Semana:</label>
-        <select id="dia">
+      <div id="visualizarTreino" >
+        <h2>Visualizar Treino</h2>
+        <label for="diaVisualizar">Dia da Semana:</label>
+        <select id="diaVisualizar" onchange="carregarTreinoDoDiaUltimaCarga()">
           <option value="">Selecione um dia</option>
           <option value="Segunda-feira">Segunda-feira</option>
           <option value="Terça-feira">Terça-feira</option>
@@ -152,14 +160,22 @@
           <option value="Sábado">Sábado</option>
           <option value="Domingo">Domingo</option>
         </select>
+      <div class="table-container">
+        <table id="data-table">
+          <thead>
+            <tr>
+              <th>Exercício</th>
+              <th>Séries</th>
+              <th>Repetições</th>
+              <th>Descanso</th>
+              <th>Última Carga (kg)</th>
+            </tr>
+          </thead>
+          <tbody id="tabelaTreino"></tbody>
+        </table>
+      </div>
 
-        <label for="exercicio">Exercício:</label>
-        <input type="text" id="exercicio" placeholder="Digite o exercício" />
-
-        <input type="number" id="series" placeholder="Séries" />
-        <input type="number" id="repeticoes" placeholder="Repetições" />
-        <input type="text" id="descanso" placeholder="Descanso" />
-        <button onclick="cadastrarTreino()">Cadastrar Treino</button>
+      <div class="list-container" id="list-container"></div>
       </div>
 
       <div id="agendaTreino" class="hidden">
@@ -186,44 +202,52 @@
         <button onclick="registrarTreino()">Registrar Treino</button>
       </div>
 
-      <div id="visualizarTreino" class="hidden">
-        <h2>Visualizar Treino</h2>
-        <label for="diaVisualizar">Dia da Semana:</label>
-        <select id="diaVisualizar" onchange="carregarTreinoDoDiaUltimaCarga()">
-          <option value="">Selecione um dia</option>
-          <option value="Segunda-feira">Segunda-feira</option>
-          <option value="Terça-feira">Terça-feira</option>
-          <option value="Quarta-feira">Quarta-feira</option>
-          <option value="Quinta-feira">Quinta-feira</option>
-          <option value="Sexta-feira">Sexta-feira</option>
-          <option value="Sábado">Sábado</option>
-          <option value="Domingo">Domingo</option>
-        </select>
-        <table>
-          <thead>
-            <tr>
-              <th>Exercício</th>
-              <th>Séries</th>
-              <th>Repetições</th>
-              <th>Descanso</th>
-              <th>Última Carga (kg)</th>
-            </tr>
-          </thead>
-          <tbody id="tabelaTreino"></tbody>
-        </table>
-      </div>
     </div>
     <div class="loading-overlay" id="loadingOverlay">
       <div class="loading-spinner"></div>
-  </div>
+    </div>
 
     <script>
+       function convertTableToList() {
+            const table = document.getElementById("data-table");
+            const listContainer = document.getElementById("list-container");
+            listContainer.innerHTML = ""; // Limpa o conteúdo anterior
+
+            const headers = Array.from(table.querySelectorAll("thead th")).map(th => th.textContent);
+            const rows = table.querySelectorAll("tbody tr");
+
+            rows.forEach(row => {
+                const cells = row.querySelectorAll("td");
+                const listGroup = document.createElement("div");
+                listGroup.classList.add("list-group");
+
+                cells.forEach((cell, index) => {
+                    const listItem = document.createElement("div");
+                    listItem.classList.add("list-item");
+                    listItem.innerHTML = `<strong>${headers[index]}:</strong> ${cell.textContent}`;
+                    listGroup.appendChild(listItem);
+                });
+
+                listContainer.appendChild(listGroup);
+            });
+        }
+
+        function initTableConversion() {
+            convertTableToList(); 
+            window.addEventListener("resize", convertTableToList);
+        }
+        window.addEventListener("DOMContentLoaded", initTableConversion);
+
       function carregandoOn() {
-            document.getElementById("loadingOverlay").style.display = "flex";
-        }
-        function carregandoOff() {
-            document.getElementById("loadingOverlay").style.display = "none";
-        }
+        document.getElementById("loadingOverlay").style.display = "flex";
+      }
+      function carregandoOff() {
+    setTimeout(function() {
+        initTableConversion();
+        document.getElementById("loadingOverlay").style.display = "none";
+    }, 3000);
+    
+  }
       urlBase =
         "https://script.google.com/macros/s/AKfycbyviFs9MB13IPH56GqNAppLv6b_w1dm9qjR0o-7DV5OscaVZDsM6n3iqzGyZZa2mlaY/exec";
       function registrarTreino() {
@@ -249,6 +273,8 @@
           return;
         }
 
+        carregandoOn();
+
         const dados = {
           tipo: "registro", // Especificando que é um registro de treino
           dia: dia,
@@ -273,90 +299,26 @@
             document.getElementById("repsFeitas").value = "";
             document.getElementById("descansoFeito").value = "";
             document.getElementById("equipamentos").value = "";
+            carregandoOff();
           })
-          .catch((error) => console.error("Erro ao registrar treino:", error));
-      }
-
-      function cadastrarTreino(dadosTreino = null) {
-        const url = urlBase; // Substitua pela URL do Apps Script
-        let dia, exercicio, series, repeticoes, descanso;
-
-        // Verificar se dadosTreino foi passado como parâmetro
-        if (dadosTreino != null) {
-          // Se sim, usa os valores de dadosTreino
-          dia = dadosTreino.dia;
-          exercicio = dadosTreino.exercicio;
-          series = dadosTreino.series;
-          repeticoes = dadosTreino.repeticoes;
-          descanso = dadosTreino.descanso;
-        } else {
-          dia = document.getElementById("dia").value;
-          exercicio = document.getElementById("exercicio").value;
-          series = document.getElementById("series").value;
-          repeticoes = document.getElementById("repeticoes").value;
-          descanso = document.getElementById("descanso").value;
-        }
-        if (!dia || !exercicio || !series || !repeticoes || !descanso) {
-          console.log(
-            "1. Preencha todos os campos! " +
-              dia +
-              " " +
-              exercicio +
-              " " +
-              series +
-              " " +
-              repeticoes +
-              " " +
-              descanso
-          );
-          return;
-        }
-
-        const dados = {
-          tipo: "ficha", // Especificando que é uma ficha de treino
-          dia: dia,
-          exercicio: exercicio,
-          series: series,
-          repeticoes: repeticoes,
-          descanso: descanso,
-        };
-
-        fetch(url, {
-          method: "POST",
-          mode: "no-cors",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(dados),
-        })
-          .then(() => {
-            alert("Ficha cadastrada com sucesso!");
-            document.getElementById("dia").value = "";
-            document.getElementById("exercicio").value = "";
-            document.getElementById("series").value = "";
-            document.getElementById("repeticoes").value = "";
-            document.getElementById("descanso").value = "";
-          })
-          .catch((error) => console.error("Erro ao cadastrar ficha:", error));
+          .catch((error) => {console.error("Erro ao registrar treino:", error),carregandoOff();});
       }
 
       function alternarModo() {
-            const modo = document.getElementById("modo").value;
-            document.getElementById("formCadastro").classList.add("hidden");
-            document.getElementById("cadastroTreino").classList.add("hidden");
-            document.getElementById("visualizarTreino").classList.add("hidden");
-            document.getElementById("agendaTreino").classList.add("hidden");
+        const modo = document.getElementById("modo").value;
+        document.getElementById("visualizarTreino").classList.add("hidden");
+        document.getElementById("agendaTreino").classList.add("hidden");
 
-            if (modo === "cadastroJson") {
-                document.getElementById("formCadastro").classList.remove("hidden");
-            } else if (modo === "cadastro") {
-                document.getElementById("cadastroTreino").classList.remove("hidden");
-            } else if (modo === "visualizar") {
-                document.getElementById("visualizarTreino").classList.remove("hidden");
-            }else if(modo === "agenda"){
-                document.getElementById("agendaTreino").classList.remove("hidden");
-            } else if (modo === "holt"){
-              window.location.href = "holt.html";
-            }
+        if (modo === "visualizar") {
+          document
+            .getElementById("visualizarTreino")
+            .classList.remove("hidden");
+        } else if (modo === "agenda") {
+          document.getElementById("agendaTreino").classList.remove("hidden");
+        } else if (modo === "holt") {
+          window.location.href = "holt.html";
         }
+      }
 
       function carregarExerciciosAgenda() {
         const dia = document.getElementById("diaTreino").value;
@@ -382,11 +344,10 @@
             });
             carregandoOff();
           })
-          .catch((error) =>{
+          .catch((error) => {
             console.error("Erro ao carregar exercícios:", error);
             carregandoOff();
-          }
-          );
+          });
       }
 
       function carregarTreinoDoDiaUltimaCarga() {
@@ -431,22 +392,25 @@
                             <td>${dados.series || "-"}</td>
                             <td>${dados.repeticoes || "-"}</td>
                             <td>${dados.descanso || "-"}</td>
-                            <td>${ultimaCarga == 0 ? "Valores não atribuidos" : ultimaCarga}</td>
+                            <td>${
+                              ultimaCarga == 0
+                                ? "Valores não atribuidos"
+                                : ultimaCarga
+                            }</td>
                         </tr>`;
                   tabela.innerHTML += row;
                 });
               })
-              .catch((error) =>{
+              .catch((error) => {
                 console.error("Erro ao carregar registros de treino:", error);
-                carregandoOff();}
-              );
-              carregandoOff()
+                carregandoOff();
+              });
+            carregandoOff();
           })
-          .catch((error) =>{
+          .catch((error) => {
             console.error("Erro ao carregar ficha de treino:", error);
-            carregandoOff();}
-          );
-          
+            carregandoOff();
+          });
       }
 
       function cadastrarFichaComJson() {
